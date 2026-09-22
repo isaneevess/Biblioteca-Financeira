@@ -1,1 +1,1 @@
-# Trabalho-Pr-tico-2---Biblioteca-Modular-em-C---TecProg
+# Trabalho-Pratico-2---Biblioteca-Modular-em-C---TecProg
