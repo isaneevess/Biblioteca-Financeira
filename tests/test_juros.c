@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <math.h>
-#include "juros.h"
+#include "Juros.h"
 
 /* Contador global de testes executados e falhados, usado pelo resumo final. */
 static int total_testes = 0;
