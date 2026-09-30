@@ -12,7 +12,7 @@ double juros_compostos(double principal, double taxa, int periodos) {
     if (principal < 0 || periodos < 0) {
         return -1.0; // Retorna -1.0 se algum dos parâmetros for inválido
     }
-    return principal * pow(1.0 + taxa, periodos - 1);
+    return principal * pow(1.0 + taxa, periodos);
 }   
 
 double juros_continuos(double principal, double taxa, double tempo) {
