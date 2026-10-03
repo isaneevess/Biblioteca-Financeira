@@ -1,5 +1,18 @@
-#ifndef TEMPO.H
-#define TEMPO.H
+#ifndef TEMPO_H
+#define TEMPO_H
+
+/**
+ * @brief Representa uma data do calendário.
+ *
+ * @param dia Dia do mês.
+ * @param mes Mês do ano.
+ * @param ano Ano da data.
+ */
+typedef struct {
+    int dia;
+    int mes;
+    int ano;
+} Data;
 
 /**
  * @brief Calcula a quantidade de dias entre duas datas.
