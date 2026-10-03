@@ -213,7 +213,7 @@ gcc -Wall -Wextra -Iinclude tests/test_metas.c src/metas.c src/Juros.c -lm -o bu
 ./build/test_metas
 ```
 
-### Documentação
+## Documentação
 
 Os comentários do cabeçalho seguem o formato Doxygen. Para gerar a
 documentação em HTML (requer o Doxygen instalado), rode `doxygen Doxyfile` e
