@@ -1,5 +1,14 @@
 # Biblioteca Modular em C - Calculadora-Financeira
 
+## Integrantes: 
+Isabela Neves Gonella
+
+Jorge Carneiro Silva Júnior
+
+Maria Júlia Costa de Lima
+
+Millena Nunes Cupolillo
+
 ## Módulo Juros
 
 Responsável por cálculos de juros sobre um valor aplicado uma única vez (sem
@@ -120,8 +129,91 @@ valor, parcela zero e dívida que nunca quita). Para compilar e rodar:
 gcc -Wall -Wextra -Iinclude tests/test_financiamento.c src/financiamento.c -lm -o build/test_financiamento
 ./build/test_financiamento
 ```
+## Módulo Metas
 
-### Documentação
+Responsável por cálculos de planejamento de metas financeiras: quanto da meta
+já foi atingido, quanto depositar por mês para alcançá-la e em quanto tempo
+ela é atingida. Considera depósitos mensais feitos no fim de cada mês, com
+capitalização composta. Implementado em `src/metas.c`, com interface pública
+em `include/metas.h`.
+
+### Funções
+
+- **`double meta_percentual_atingido(double meta, double valor_atual)`**
+  Calcula o percentual da meta já atingido: `percentual = (valor_atual / meta) * 100`.
+  O resultado pode ultrapassar `100.0` quando o valor atual supera a meta.
+
+- **`double meta_aporte_mensal(double meta, double taxa, int periodos)`**
+  Calcula quanto depositar por mês, a partir de saldo zero, para atingir a meta
+  em `periodos` meses: `aporte = meta * taxa / ((1 + taxa)^periodos - 1)`, ou
+  `meta / periodos` se `taxa = 0`.
+
+- **`int meta_prazo_necessario(double meta, double valor_atual, double aporte_mensal, double taxa_mensal, double *meses)`**
+  Calcula em quantos meses a meta é atingida, dado um saldo inicial e um
+  aporte mensal:
+  `meses = ln((meta * taxa + aporte) / (valor_atual * taxa + aporte)) / ln(1 + taxa)`,
+  ou `(meta - valor_atual) / aporte` se `taxa = 0`. Se o valor atual já for
+  maior ou igual à meta, o prazo é `0`. O resultado pode ser fracionário
+  (por exemplo, 47.3 meses).
+
+### Tratamento de erros
+
+`meta_percentual_atingido` e `meta_aporte_mensal` retornam `-1.0` caso os
+parâmetros de entrada sejam inválidos (`meta <= 0`, `valor_atual < 0`,
+`taxa < 0` ou `periodos <= 0`). Valores negativos de `valor_atual` são
+rejeitados porque o módulo trata esse valor como saldo acumulado.
+
+`meta_prazo_necessario` retorna um código de status e grava o prazo em
+`*meses` apenas em caso de sucesso:
+
+| Código | Valor | Situação |
+|---|---|---|
+| `META_OK` | `0` | Cálculo concluído com sucesso |
+| `META_ERRO_PARAMETRO` | `-1` | `meta <= 0`, `valor_atual < 0`, `aporte_mensal < 0` ou `taxa_mensal < 0` |
+| `META_ERRO_INALCANCAVEL` | `-2` | Sem aporte e sem rendimento sobre o saldo, então a meta nunca é atingida |
+| `META_ERRO_PONTEIRO_NULO` | `-3` | `meses` é `NULL` |
+
+Em caso de erro, o conteúdo apontado por `meses` não é modificado.
+
+A `taxa` é sempre mensal, em decimal (1% = `0.01`), e `periodos` é o número de
+meses.
+
+### Dependência de outros módulos
+
+O módulo Metas depende do módulo Juros: `meta_aporte_mensal` obtém o fator de
+capitalização `(1 + taxa)^periodos` chamando `juros_compostos(1.0, taxa, periodos)`
+em vez de repetir o cálculo. A dependência é interna, pois `include/Juros.h`
+é incluído apenas em `src/metas.c`, e a interface pública de `metas.h` não
+muda.
+
+### Dependência externa
+
+O módulo utiliza a função `log()` da biblioteca padrão do C (`math.h`) e,
+indiretamente, `pow()` através do módulo Juros. Por isso, **é necessário
+linkar com a biblioteca matemática ao compilar**, usando a flag `-lm`, e
+incluir `src/Juros.c` na compilação:
+
+```bash
+gcc -Wall -Wextra -Iinclude tests/test_metas.c src/metas.c src/Juros.c -lm -o build/test_metas
+```
+
+Sem o `-lm`, a compilação falha com erro de referência indefinida a `log`/`pow`.
+Sem `src/Juros.c`, falha com referência indefinida a `juros_compostos`.
+
+### Testes
+
+Os testes automatizados estão em `tests/test_metas.c` e cobrem casos válidos
+(percentual abaixo, igual e acima da meta, aporte com e sem juros, prazo com
+aporte, sem aporte e com meta já atingida) e casos limite/erro (meta zero ou
+negativa, valores negativos, prazo zero, taxa zero, meta inalcançável e
+ponteiro nulo). Para compilar e rodar:
+
+```bash
+gcc -Wall -Wextra -Iinclude tests/test_metas.c src/metas.c src/Juros.c -lm -o build/test_metas
+./build/test_metas
+```
+
+## Documentação
 
 Os comentários do cabeçalho seguem o formato Doxygen. Para gerar a
 documentação em HTML (requer o Doxygen instalado), rode `doxygen Doxyfile` e
