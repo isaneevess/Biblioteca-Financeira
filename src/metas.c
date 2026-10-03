@@ -1,6 +1,7 @@
 #include <math.h>
 #include <stddef.h>
 #include "metas.h"
+#include "Juros.h"
 
 double meta_percentual_atingido(double meta, double valor_atual)
 {
@@ -13,13 +14,16 @@ double meta_percentual_atingido(double meta, double valor_atual)
 
 double meta_aporte_mensal(double meta, double taxa, int periodos)
 {
+    double fator;
+
     if (meta <= 0.0 || taxa < 0.0 || periodos <= 0)
         return -1.0;
 
     if (taxa == 0.0)
         return meta / periodos;
 
-    return meta * taxa / (pow(1.0 + taxa, periodos) - 1.0);
+    fator = juros_compostos(1.0, taxa, periodos);   /* (1 + taxa)^periodos */
+    return meta * taxa / (fator - 1.0);
 }
 
 int meta_prazo_necessario(double meta, double valor_atual, double aporte_mensal,
