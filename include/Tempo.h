@@ -1,5 +1,11 @@
-#ifndef TEMPO.H
-#define TEMPO.H
+#ifndef TEMPO_H
+#define TEMPO_H
+
+typedef struct {
+    int dia;
+    int mes;
+    int ano;
+} Data;
 
 /**
  * @brief Calcula a quantidade de dias entre duas datas.
