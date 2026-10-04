@@ -47,6 +47,17 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
 # O '-' faz o make ignorar os .d que ainda nao existem (primeira compilacao).
 -include $(DEPS)
 
+# -------------------------------------------------------------------
+# Bloco 2 - Bibliotecas estatica (.a) e dinamica (.so)
+# -------------------------------------------------------------------
+# Estatica: 'ar rcs' empacota os .o num arquivo .a. O codigo da
+# biblioteca fica copiado dentro de qualquer executavel que linkar
+# com ela (standalone, nao precisa do .a depois de compilado).
+#
+# Dinamica: 'gcc -shared' gera um .so a partir dos mesmos .o. 
+# O codigo NAO e copiado — fica carregado em tempo de
+# execucao, e por isso o alvo 'run' precisa do LD_LIBRARY_PATH.
+
 .PHONY: all
 
 all: $(STATIC_LIB) $(SHARED_LIB) $(APP_BIN)
@@ -59,3 +70,66 @@ $(SHARED_LIB): $(OBJS) | $(LIB_DIR)
 
 $(BUILD_DIR) $(LIB_DIR) $(BIN_DIR):
 	mkdir -p $@
+
+# ===================================================================
+# Bloco 3 — App cliente, execucao e testes
+# ===================================================================
+
+.PHONY: run test
+
+# -------------------------------------------------------------------
+# App cliente
+# -------------------------------------------------------------------
+# Linka o app com a biblioteca DINAMICA (.so).
+# Depende de $(SHARED_LIB): so compila depois que o Bloco 2 ja gerou a
+# biblioteca dinamica.
+$(APP_BIN): $(APP_SRC) $(SHARED_LIB) | $(BIN_DIR)
+	$(CC) $(CFLAGS) $(APP_SRC) -L$(LIB_DIR) -l$(LIB_NAME) $(LDLIBS) -o $@
+
+# Executa o app cliente. 
+run: $(APP_BIN)
+	LD_LIBRARY_PATH=$(LIB_DIR):$$LD_LIBRARY_PATH ./$(APP_BIN)
+
+# -------------------------------------------------------------------
+# Testes automatizados — um binario por módulo, nomeado explicitamente
+# -------------------------------------------------------------------
+# Cada teste é compilado como um executavel separado, linkado com TODOS
+# os objetos da biblioteca (não só com o módulo que ele testa) porque
+# os arquivos de teste usam apenas as funções da API pública (headers),
+# então basta ter os simbolos disponiveis no link.
+
+# Modulo: juros 
+$(BUILD_DIR)/test_juros: $(TEST_DIR)/test_juros.c $(OBJS) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $< $(OBJS) $(LDLIBS) -o $@
+
+# Modulo: financiamento
+$(BUILD_DIR)/test_financiamento: $(TEST_DIR)/test_financiamento.c $(OBJS) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $< $(OBJS) $(LDLIBS) -o $@
+
+# Modulo: metas financeiras
+$(BUILD_DIR)/test_metas: $(TEST_DIR)/test_metas.c $(OBJS) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $< $(OBJS) $(LDLIBS) -o $@
+
+# Modulo: planejamento financeiro / tempo
+$(BUILD_DIR)/test_tempo: $(TEST_DIR)/test_tempo.c $(OBJS) | $(BUILD_DIR)
+	$(CC) $(CFLAGS) $< $(OBJS) $(LDLIBS) -o $@
+
+# Roda os quatro modulos, um de cada vez. O '|| status=1' registra que
+# aquele modulo falhou SEM interromper os demais — assim a suite
+# inteira roda até o fim mesmo que um teste quebre no meio, e o 'exit'
+# no final garante codigo de saida != 0 se qualquer um tiver falhado.
+test: $(BUILD_DIR)/test_juros $(BUILD_DIR)/test_financiamento $(BUILD_DIR)/test_metas $(BUILD_DIR)/test_tempo
+	@status=0; \
+	echo "== Modulo: Juros =="; \
+	./$(BUILD_DIR)/test_juros || status=1; \
+	echo ""; \
+	echo "== Modulo: Financiamento =="; \
+	./$(BUILD_DIR)/test_financiamento || status=1; \
+	echo ""; \
+	echo "== Modulo: Metas financeiras =="; \
+	./$(BUILD_DIR)/test_metas || status=1; \
+	echo ""; \
+	echo "== Modulo: Planejamento financeiro (tempo) =="; \
+	./$(BUILD_DIR)/test_tempo || status=1; \
+	echo ""; \
+	exit $$status
