@@ -1,5 +1,5 @@
 #include <math.h>
-#include "Juros.h"
+#include "juros.h"
 
 double juros_simples(double principal, double taxa, int periodos) {
     if (principal < 0 || periodos < 0) {
