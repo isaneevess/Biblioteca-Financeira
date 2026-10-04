@@ -46,3 +46,16 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
 # --- Dependencias de headers geradas pelo -MMD -MP ---
 # O '-' faz o make ignorar os .d que ainda nao existem (primeira compilacao).
 -include $(DEPS)
+
+.PHONY: all
+
+all: $(STATIC_LIB) $(SHARED_LIB) $(APP_BIN)
+
+$(STATIC_LIB): $(OBJS) | $(LIB_DIR)
+	ar rcs $@ $(OBJS)
+
+$(SHARED_LIB): $(OBJS) | $(LIB_DIR)
+	$(CC) -shared -o $@ $(OBJS) $(LDLIBS)
+
+$(BUILD_DIR) $(LIB_DIR) $(BIN_DIR):
+	mkdir -p $@
