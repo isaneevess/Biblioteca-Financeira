@@ -58,7 +58,7 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
 # O codigo NAO e copiado — fica carregado em tempo de
 # execucao, e por isso o alvo 'run' precisa do LD_LIBRARY_PATH.
 
-.PHONY: all
+.PHONY: all run test clean install
 
 all: $(STATIC_LIB) $(SHARED_LIB) $(APP_BIN)
 
@@ -75,8 +75,25 @@ $(BUILD_DIR) $(LIB_DIR) $(BIN_DIR):
 # Bloco 3 — App cliente, execucao e testes
 # ===================================================================
 
-.PHONY: run test
 
+
+# -------------------------------------------------------------------
+# comando install
+# -------------------------------------------------------------------
+install: all
+	mkdir -p $(PREFIX)/include
+	mkdir -p $(PREFIX)/lib
+	cp $(INC_DIR)/*.h $(PREFIX)/include/
+	cp $(STATIC_LIB) $(PREFIX)/lib/
+	cp $(SHARED_LIB) $(PREFIX)/lib/
+
+
+# -------------------------------------------------------------------
+# comando clean
+# -------------------------------------------------------------------
+clean:
+	rm -rf $(BUILD_DIR) $(LIB_DIR) $(BIN_DIR)
+	
 # -------------------------------------------------------------------
 # App cliente
 # -------------------------------------------------------------------
@@ -133,3 +150,4 @@ test: $(BUILD_DIR)/test_juros $(BUILD_DIR)/test_financiamento $(BUILD_DIR)/test_
 	./$(BUILD_DIR)/test_tempo || status=1; \
 	echo ""; \
 	exit $$status
+
