@@ -1,7 +1,7 @@
 #include <math.h>
 #include <stddef.h>
 #include "metas.h"
-#include "Juros.h"
+#include "juros.h"
 
 double meta_percentual_atingido(double meta, double valor_atual)
 {
