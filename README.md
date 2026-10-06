@@ -34,22 +34,26 @@ inválidos (ex.: `principal` ou `periodos`/`tempo` negativos).
 
 ### Tratamento de erros
 
-`juros_simples` e `juros_compostos` retornam `-1.0` caso os parâmetros de
-entrada sejam inválidos (`principal < 0`, `taxa < -1.0` ou `periodos < 0`).
-O limite mínimo de `taxa` (`-1.0`) existe porque uma taxa menor que isso
+`juros_simples`, `juros_compostos` e `juros_continuos` retornam um código
+de erro no lugar do montante, em caso de parâmetro inválido:
+
+| Código                          | Valor | Situação                                  |
+|----------------------------------|-------|--------------------------------------------|
+| `JUROS_ERRO_PRINCIPAL_INVALIDO`  | -1.0  | `principal < 0`                             |
+| `JUROS_ERRO_TAXA_INVALIDA`       | -2.0  | `taxa < -1.0` (não se aplica a juros_continuos) |
+| `JUROS_ERRO_PERIODO_INVALIDO`    | -3.0  | `periodos < 0` (juros_simples/compostos)    |
+| `JUROS_ERRO_TEMPO_INVALIDO`      | -3.0  | `tempo < 0` (juros_continuos)               |
+
+O limite mínimo de `taxa` (-1.0) existe porque uma taxa menor que isso
 tornaria o fator `(1 + taxa)` negativo, podendo gerar um montante negativo
-que se confundiria com o próprio valor de erro (`-1.0`) — ou seja, o limite
-preserva a leitura inequívoca do retorno `-1.0` como "erro".
+que se confundiria com um código de erro. `juros_continuos` não restringe o
+sinal de `taxa` pelo mesmo motivo contrário: como usa `exp()`, que é sempre
+positiva, o resultado nunca fica negativo mesmo com taxa negativa (ex:
+desvalorização).
 
-`juros_continuos` retorna `-1.0` caso `principal < 0` ou `tempo < 0`. Não há
-restrição sobre o sinal de `taxa` nesse caso: como a função usa `exp()`, que
-é sempre positiva, o resultado nunca fica negativo mesmo com uma taxa
-negativa (que pode representar, por exemplo, desvalorização).
-
-A taxa é sempre decimal (1% = `0.01`). Em `juros_simples` e
-`juros_compostos`, `periodos` é a quantidade de períodos discretos
-(inteiro); em `juros_continuos`, `tempo` pode ser fracionário, já que a
-capitalização é contínua.
+A taxa é sempre decimal (1% = `0.01`). Em `juros_simples`/`juros_compostos`,
+`periodos` é a quantidade de períodos discretos (inteiro); em
+`juros_continuos`, `tempo` pode ser fracionário.
 
 ### Dependência externa
 
