@@ -1,5 +1,5 @@
 #include <math.h>
-#include "Tempo.h"
+#include "tempo.h"
 
 
 static int ano_bissexto(int ano) {
