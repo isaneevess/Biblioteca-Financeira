@@ -1,1 +1,7 @@
+# Arquivos gerados pela compilacao
 build/
+lib/
+bin/
+
+# Configuracao do editor (opcional)
+.vscode/
