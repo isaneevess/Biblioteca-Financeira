@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <math.h>
-#include "Juros.h"
+#include "juros.h"
 
 /* Contador global de testes executados e falhados, usado pelo resumo final. */
 static int total_testes = 0;
@@ -60,15 +60,29 @@ int main(void) {
     );
 
     /* ---- Casos de valor limite / entrada inválida ---- */
-
     verificar(
         "juros_simples com principal negativo retorna -1",
-        juros_simples(-100.0, 0.05, 3) == -1.0
+        juros_simples(-100.0, 0.05, 3) == JUROS_ERRO_PRINCIPAL_INVALIDO
     );
 
     verificar(
         "juros_compostos com periodos negativo retorna -1",
-        juros_compostos(1000.0, 0.05, -1) == -1.0
+        juros_compostos(1000.0, 0.05, -1) == JUROS_ERRO_PERIODO_INVALIDO
+    );
+
+    verificar(
+        "juros_simples com taxa menor que -1.0 retorna -1",
+        juros_simples(1000.0, -1.5, 3) == JUROS_ERRO_TAXA_INVALIDA
+    );
+
+    verificar(
+        "juros_compostos com taxa menor que -1.0 retorna -1",
+        juros_compostos(1000.0, -1.5, 3) == JUROS_ERRO_TAXA_INVALIDA
+    );
+
+    verificar(
+        "juros_simples com taxa igual a -1.0 (limite) eh aceita",
+        quase_igual(juros_simples(1000.0, -1.0, 3), -2000.0)
     );
 
     verificar(
@@ -78,7 +92,7 @@ int main(void) {
 
     verificar(
         "juros_continuos com tempo negativo retorna -1",
-        juros_continuos(1000.0, 0.05, -1.0) == -1.0
+        juros_continuos(1000.0, 0.05, -1.0) == JUROS_ERRO_TEMPO_INVALIDO
     );
 
     verificar(

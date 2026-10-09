@@ -32,6 +32,29 @@ em `include/Juros.h`.
 Todas as funções retornam `-1.0` caso os parâmetros de entrada sejam
 inválidos (ex.: `principal` ou `periodos`/`tempo` negativos).
 
+### Tratamento de erros
+
+`juros_simples`, `juros_compostos` e `juros_continuos` retornam um código
+de erro no lugar do montante, em caso de parâmetro inválido:
+
+| Código                          | Valor | Situação                                  |
+|----------------------------------|-------|--------------------------------------------|
+| `JUROS_ERRO_PRINCIPAL_INVALIDO`  | -1.0  | `principal < 0`                             |
+| `JUROS_ERRO_TAXA_INVALIDA`       | -2.0  | `taxa < -1.0` (não se aplica a juros_continuos) |
+| `JUROS_ERRO_PERIODO_INVALIDO`    | -3.0  | `periodos < 0` (juros_simples/compostos)    |
+| `JUROS_ERRO_TEMPO_INVALIDO`      | -3.0  | `tempo < 0` (juros_continuos)               |
+
+O limite mínimo de `taxa` (-1.0) existe porque uma taxa menor que isso
+tornaria o fator `(1 + taxa)` negativo, podendo gerar um montante negativo
+que se confundiria com um código de erro. `juros_continuos` não restringe o
+sinal de `taxa` pelo mesmo motivo contrário: como usa `exp()`, que é sempre
+positiva, o resultado nunca fica negativo mesmo com taxa negativa (ex:
+desvalorização).
+
+A taxa é sempre decimal (1% = `0.01`). Em `juros_simples`/`juros_compostos`,
+`periodos` é a quantidade de períodos discretos (inteiro); em
+`juros_continuos`, `tempo` pode ser fracionário.
+
 ### Dependência externa
 
 O módulo utiliza as funções `pow()` e `exp()` da biblioteca padrão do C
