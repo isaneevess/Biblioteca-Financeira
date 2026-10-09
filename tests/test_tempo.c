@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <math.h>
-#include "Tempo.h"
+#include "tempo.h"
 
 static int total_testes = 0;
 static int testes_falhos = 0;
