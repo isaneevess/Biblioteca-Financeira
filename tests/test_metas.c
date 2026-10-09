@@ -47,17 +47,30 @@ static void testa_percentual(void)
 
 static void testa_aporte(void)
 {
+    double aporte;
+    double meses = -999.0;
+
     printf("\n--- meta_aporte_mensal ---\n");
 
-    verifica_double("10000 a 1% em 12 meses", meta_aporte_mensal(10000.0, 0.01, 12), 788.49, 0.01);
-    verifica_double("taxa zero (1200 em 12 meses)", meta_aporte_mensal(1200.0, 0.0, 12), 100.0, 1e-6);
-    verifica_double("1 unico periodo",        meta_aporte_mensal(1000.0, 0.05, 1),   1000.0, 1e-6);
+    verifica_double("do zero: 10000 a 1% em 12 meses", meta_aporte_mensal(10000.0, 0.0, 0.01, 12), 788.49, 0.01);
+    verifica_double("com saldo: 10000, saldo 2500",    meta_aporte_mensal(10000.0, 2500.0, 0.01, 12), 566.37, 0.01);
+    verifica_double("taxa zero do zero (1200 em 12 meses)", meta_aporte_mensal(1200.0, 0.0, 0.0, 12), 100.0, 1e-6);
+    verifica_double("taxa zero com saldo (1200, saldo 600)", meta_aporte_mensal(1200.0, 600.0, 0.0, 12), 50.0, 1e-6);
+    verifica_double("1 unico periodo",        meta_aporte_mensal(1000.0, 0.0, 0.05, 1), 1000.0, 1e-6);
+    verifica_double("saldo igual a meta",     meta_aporte_mensal(1000.0, 1000.0, 0.01, 12), 0.0, 1e-6);
+    verifica_double("saldo rende e passa a meta", meta_aporte_mensal(1000.0, 2000.0, 0.01, 12), 0.0, 1e-6);
 
-    /* entradas inválidas */
-    verifica_double("periodos zero",   meta_aporte_mensal(1000.0, 0.01, 0),   -1.0, 1e-6);
-    verifica_double("periodos negativo", meta_aporte_mensal(1000.0, 0.01, -5), -1.0, 1e-6);
-    verifica_double("meta zero",       meta_aporte_mensal(0.0, 0.01, 12),     -1.0, 1e-6);
-    verifica_double("taxa negativa",   meta_aporte_mensal(1000.0, -0.01, 12), -1.0, 1e-6);
+    /* consistencia: o aporte calculado deve levar a meta no prazo pedido */
+    aporte = meta_aporte_mensal(10000.0, 2500.0, 0.01, 12);
+    meta_prazo_necessario(10000.0, 2500.0, aporte, 0.01, &meses);
+    verifica_double("aporte calculado atinge a meta em 12 meses", meses, 12.0, 1e-6);
+
+    /* entradas invalidas */
+    verifica_double("periodos zero",     meta_aporte_mensal(1000.0, 0.0, 0.01, 0),   -1.0, 1e-6);
+    verifica_double("periodos negativo", meta_aporte_mensal(1000.0, 0.0, 0.01, -5),  -1.0, 1e-6);
+    verifica_double("meta zero",         meta_aporte_mensal(0.0, 0.0, 0.01, 12),     -1.0, 1e-6);
+    verifica_double("taxa negativa",     meta_aporte_mensal(1000.0, 0.0, -0.01, 12), -1.0, 1e-6);
+    verifica_double("saldo negativo",    meta_aporte_mensal(1000.0, -1.0, 0.01, 12), -1.0, 1e-6);
 }
 
 static void testa_prazo(void)

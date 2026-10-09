@@ -156,9 +156,9 @@ gcc -Wall -Wextra -Iinclude tests/test_financiamento.c src/financiamento.c -lm -
 
 Responsável por cálculos de planejamento de metas financeiras: quanto da meta
 já foi atingido, quanto depositar por mês para alcançá-la e em quanto tempo
-ela é atingida. Considera depósitos mensais feitos no fim de cada mês, com
-capitalização composta. Implementado em `src/metas.c`, com interface pública
-em `include/metas.h`.
+ela é atingida. Considera um saldo inicial e depósitos mensais feitos no fim de
+cada mês, com capitalização composta. Implementado em `src/metas.c`, com
+interface pública em `include/metas.h`.
 
 ### Funções
 
@@ -166,10 +166,14 @@ em `include/metas.h`.
   Calcula o percentual da meta já atingido: `percentual = (valor_atual / meta) * 100`.
   O resultado pode ultrapassar `100.0` quando o valor atual supera a meta.
 
-- **`double meta_aporte_mensal(double meta, double taxa, int periodos)`**
-  Calcula quanto depositar por mês, a partir de saldo zero, para atingir a meta
-  em `periodos` meses: `aporte = meta * taxa / ((1 + taxa)^periodos - 1)`, ou
-  `meta / periodos` se `taxa = 0`.
+- **`double meta_aporte_mensal(double meta, double valor_atual, double taxa, int periodos)`**
+  Calcula quanto depositar por mês, considerando um saldo inicial, para atingir
+  a meta em `periodos` meses. O saldo inicial também rende juros, então reduz o
+  valor que falta juntar:
+  `aporte = (meta - valor_atual * (1 + taxa)^periodos) * taxa / ((1 + taxa)^periodos - 1)`,
+  ou `(meta - valor_atual) / periodos` se `taxa = 0`. Se o saldo inicial, com seus
+  rendimentos, já atingir a meta, o aporte é `0`. Use `valor_atual = 0` para
+  começar do zero.
 
 - **`int meta_prazo_necessario(double meta, double valor_atual, double aporte_mensal, double taxa_mensal, double *meses)`**
   Calcula em quantos meses a meta é atingida, dado um saldo inicial e um
@@ -178,6 +182,10 @@ em `include/metas.h`.
   ou `(meta - valor_atual) / aporte` se `taxa = 0`. Se o valor atual já for
   maior ou igual à meta, o prazo é `0`. O resultado pode ser fracionário
   (por exemplo, 47.3 meses).
+
+As duas últimas funções são coerentes entre si: o aporte calculado por
+`meta_aporte_mensal` para um prazo de N meses, quando passado para
+`meta_prazo_necessario`, resulta em N meses.
 
 ### Tratamento de erros
 
@@ -207,7 +215,7 @@ O módulo Metas depende do módulo Juros: `meta_aporte_mensal` obtém o fator de
 capitalização `(1 + taxa)^periodos` chamando `juros_compostos(1.0, taxa, periodos)`
 em vez de repetir o cálculo. A dependência é interna, pois `include/Juros.h`
 é incluído apenas em `src/metas.c`, e a interface pública de `metas.h` não
-muda.
+depende dele.
 
 ### Dependência externa
 
@@ -226,10 +234,11 @@ Sem `src/Juros.c`, falha com referência indefinida a `juros_compostos`.
 ### Testes
 
 Os testes automatizados estão em `tests/test_metas.c` e cobrem casos válidos
-(percentual abaixo, igual e acima da meta, aporte com e sem juros, prazo com
-aporte, sem aporte e com meta já atingida) e casos limite/erro (meta zero ou
-negativa, valores negativos, prazo zero, taxa zero, meta inalcançável e
-ponteiro nulo). Para compilar e rodar:
+(percentual abaixo, igual e acima da meta; aporte do zero e com saldo inicial,
+com e sem juros; prazo com aporte, sem aporte e com meta já atingida), a
+consistência entre aporte e prazo, e casos limite/erro (meta zero ou negativa,
+valores negativos, prazo zero, taxa zero, meta inalcançável e ponteiro nulo).
+Para compilar e rodar:
 
 ```bash
 gcc -Wall -Wextra -Iinclude tests/test_metas.c src/metas.c src/Juros.c -lm -o build/test_metas
