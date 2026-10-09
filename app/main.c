@@ -18,8 +18,14 @@ void demonstrar_juros(void) {
     printf("Juros continuos: R$ %.2f\n\n", juros_continuos(principal, taxa, (double) periodos));
 }
 
+void demonstrar_metas(){
+
+    printf("--- Modulo Metas ---\n");
+}
+
 int main(void) {
     printf("=== Demonstracao da Biblioteca Financeira ===\n\n");
+    demonstrar_juros();
     demonstrar_juros();
     return 0;
 }
