@@ -93,7 +93,7 @@ em `src/financiamento.c`, com interface pública em `include/financiamento.h`.
 
 - **`Simulacao`**: agrupa os resultados de `simular_fin` (`parcela`,
   `total_pago`, `total_juros` e `percentual`).
-- **`Amortizacao`**: agrupa os resultados de `amortizacao` (`meses` e
+- **`Amortizacao`**: agrupa os resultados de `amortizacao` (`parcelas` e
   `total_juros`).
 
 ### Funções
@@ -113,11 +113,11 @@ em `src/financiamento.c`, com interface pública em `include/financiamento.h`.
   calcula o maior valor que pode ser financiado:
   `financiado = parcela * (1 - (1 + taxa)^(-n)) / taxa`, ou `parcela * n` se `taxa = 0`.
 
-- **`int amortizacao(double divida, double parcela, double extra, double taxa, Amortizacao *resultado)`**
+- **`int amortizacao(double divida, double valor_parcela, double extra, double taxa, Amortizacao *resultado)`**
   Simula o financiamento mês a mês pagando a parcela mais um valor extra. A
   cada mês os juros incidem sobre o saldo devedor (`juros = saldo * taxa`) e o
-  pagamento total é descontado, até a dívida ser quitada. Devolve em quantos
-  meses isso acontece e o total de juros pago, o que permite comparar com
+  pagamento total é descontado, até a dívida ser quitada. Devolve em quantas
+  parcelas isso acontece e o total de juros pago, o que permite comparar com
   `extra = 0` e ver a economia.
 
 Todas as funções retornam `0` em caso de sucesso e `-1` caso os parâmetros de

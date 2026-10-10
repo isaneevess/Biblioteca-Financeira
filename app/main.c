@@ -71,9 +71,46 @@ void demonstrar_metas(){
     printf("\n");
 }
 
+void demonstrar_financiamento() {
+    double valor = 1000.0;
+    double entrada = 0.0;
+    double taxa = 0.05;
+    int n = 3;
+    double extra = 100.0;
+
+    Simulacao s;
+    double maximo;
+    Amortizacao sem_extra, com_extra;
+
+    printf("--- Modulo Financiamento ---\n");
+    printf("Valor: R$ %.2f | Entrada: R$ %.2f | Taxa: %.1f%% | Parcelas: %d\n", valor, entrada, taxa * 100, n);
+
+    if (simular_fin(valor, entrada, taxa, n, &s) == 0) {
+        printf("Parcela:          R$ %.2f\n", s.parcela);
+        printf("Total pago:       R$ %.2f\n", s.total_pago);
+        printf("Total de juros:   R$ %.2f (%.2f%% do financiado)\n", s.total_juros, s.percentual);
+
+        if (valor_financiavel(s.parcela, taxa, n, &maximo) == 0) {
+            printf("Valor financiavel com essa parcela: R$ %.2f\n", maximo);
+        }
+
+        if (amortizacao(valor - entrada, s.parcela, 0.0, taxa, &sem_extra) == 0 &&
+            amortizacao(valor - entrada, s.parcela, extra, taxa, &com_extra) == 0) {
+            printf("Sem extra:        %d parcelas, R$ %.2f de juros\n", sem_extra.parcelas, sem_extra.total_juros);
+            printf("Com extra R$ %.2f: %d parcelas, R$ %.2f de juros\n", extra, com_extra.parcelas, com_extra.total_juros);
+            printf("Economia:         %d parcelas e R$ %.2f de juros\n",
+                   sem_extra.parcelas - com_extra.parcelas, sem_extra.total_juros - com_extra.total_juros);
+        }
+    } else {
+        printf("Parametros invalidos.\n");
+    }
+    printf("\n");
+}
+
 int main(void) {
     printf("=== Demonstracao da Biblioteca Financeira ===\n\n");
     demonstrar_juros();
     demonstrar_metas();
+    demonstrar_financiamento();
     return 0;
 }

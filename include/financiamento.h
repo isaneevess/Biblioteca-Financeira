@@ -63,7 +63,7 @@ int valor_financiavel(double parcela, double taxa, int n, double *resultado);
  * @brief Resultados de uma amortização.
  */
 typedef struct {
-    int meses; /**< Tempo para quitar a dívida. */
+    int parcelas; /**< Tempo para quitar a dívida. */
     double total_juros; /**< Quanto de juros foi pago. */
 } Amortizacao;
 
@@ -72,15 +72,15 @@ typedef struct {
  * 
  * A cada mês, calcula os juros sobre o saldo devedor, desconta o pagamento total e repete até a dívida zerar.
  * 
- * No final, devolve em quantos meses o financiamento termina e quanto de juros foi pago no total.
+ * No final, devolve em quantas parcelas o financiamento termina e quanto de juros foi pago no total.
  * 
  * @param divida O valor a ser financiado (deve ser maior que 0).
- * @param parcela O valor da parcela mensal (deve ser maior que 0).
+ * @param valor_parcela O valor da parcela mensal (deve ser maior que 0).
  * @param extra O valor extra a ser pago além da parcela (deve ser maior ou igual a 0).
  * @param taxa Taxa de juros mensal, em decimal (Ex.: 0.02 ao mês; deve ser maior ou igual a 0).
- * @param resultado Ponteiro para a struct onde serão gravados em quantos meses o financiamento termina e quanto de juros foi pago no total.
+ * @param resultado Ponteiro para a struct onde serão gravados em quantas parcelas o financiamento termina e quanto de juros foi pago no total.
  * @return 0 em caso de sucesso, -1 se algum parâmetro for inválido ou se o pagamento mensal não cobrir os juros (a dívida nunca seria quitada).
  */
-int amortizacao(double divida, double parcela, double extra, double taxa, Amortizacao *resultado);
+int amortizacao(double divida, double valor_parcela, double extra, double taxa, Amortizacao *resultado);
 
 #endif
