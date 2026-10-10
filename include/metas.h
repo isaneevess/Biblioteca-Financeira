@@ -19,17 +19,22 @@ double meta_percentual_atingido(double meta, double valor_atual);
 /**
  * @brief Calcula quanto é preciso depositar por mês para atingir a meta.
  *
- * Considera depósitos no fim de cada mês, com juros compostos.
- * A fórmula é: aporte = meta * taxa / ((1 + taxa) ^ periodos - 1)
- * Se a taxa for 0, o aporte é meta / periodos.
-
+ * Considera um saldo inicial e depósitos no fim de cada mês, com juros compostos.
+ * O saldo inicial também rende juros, então reduz o valor que falta juntar.
+ * A fórmula é:
+ * aporte = (meta - valor_atual * (1 + taxa)^periodos) * taxa / ((1 + taxa)^periodos - 1)
+ * Se a taxa for 0, o aporte é (meta - valor_atual) / periodos.
+ * Se o saldo inicial, com seus rendimentos, já atingir a meta, o aporte é 0.
  *
  * @param meta O valor que se deseja acumular. (Deve ser maior que 0)
- * @param taxa A taxa de juros mensal (em decimal). Por exemplo, 0.01 para 1%. (Deve ser maior ou igual a 0)
+ * @param valor_atual O valor já acumulado. Use 0 para começar do zero.
+ * (Deve ser maior ou igual a 0)
+ * @param taxa A taxa de juros mensal (em decimal). Por exemplo, 0.01 para 1%.
+ * (Deve ser maior ou igual a 0)
  * @param periodos O prazo, em meses. (Deve ser maior que 0)
  * @return O valor a depositar por mês. Retorna -1.0 se algum dos parâmetros for inválido.
  */
-double meta_aporte_mensal(double meta, double taxa, int periodos);
+double meta_aporte_mensal(double meta, double valor_atual, double taxa, int periodos);
 
 /**
  * @brief Calcula quantos meses são necessários para atingir a meta.

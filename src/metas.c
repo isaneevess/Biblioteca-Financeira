@@ -12,19 +12,26 @@ double meta_percentual_atingido(double meta, double valor_atual)
     return (valor_atual / meta) * 100.0;
 }
 
-double meta_aporte_mensal(double meta, double taxa, int periodos)
+double meta_aporte_mensal(double meta, double valor_atual, double taxa, int periodos)
 {
     double fator;
-
-    if (meta <= 0.0 || taxa < 0.0 || periodos <= 0)
+    double faltante;
+ 
+    if (meta <= 0.0 || valor_atual < 0.0 || taxa < 0.0 || periodos <= 0)
         return -1.0;
-
+ 
+    fator = juros_compostos(1.0, taxa, periodos);   
+    faltante = meta - valor_atual * fator;          
+ 
+    if (faltante <= 0.0)
+        return 0.0;                                 
+ 
     if (taxa == 0.0)
-        return meta / periodos;
-
-    fator = juros_compostos(1.0, taxa, periodos);   /* (1 + taxa)^periodos */
-    return meta * taxa / (fator - 1.0);
+        return faltante / periodos;
+ 
+    return faltante * taxa / (fator - 1.0);
 }
+ 
 
 int meta_prazo_necessario(double meta, double valor_atual, double aporte_mensal,
                           double taxa_mensal, double *meses)
