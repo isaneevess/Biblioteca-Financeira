@@ -296,6 +296,45 @@ make test
 ```
 
 
+## Bibliotecas estática e dinâmica
+
+O projeto gera duas versões da biblioteca financeira: uma estática (`.a`) e outra dinâmica (`.so`). Ambas são construídas a partir dos arquivos objeto dos módulos da biblioteca.
+
+### Biblioteca estática
+
+A biblioteca estática é gerada no arquivo `lib/libfinanceira.a`, utilizando o comando `ar rcs`. Durante a linkagem, o código objeto necessário é incorporado ao executável, permitindo que ele seja executado sem depender da biblioteca dinâmica do projeto.
+
+Para compilar e executar a aplicação utilizando a biblioteca estática:
+
+```bash
+make
+make run-static
+```
+
+O executável gerado é `bin/app_estatico`.
+
+### Biblioteca dinâmica
+
+A biblioteca dinâmica é gerada no arquivo `lib/libfinanceira.so`, utilizando o compilador GCC com a opção `-shared`. Nesse caso, o código da biblioteca é carregado durante a execução do programa.
+
+Para compilar e executar a aplicação utilizando a biblioteca dinâmica:
+
+```bash
+make
+make run
+```
+
+O executável gerado é `bin/app_dinamico`. O alvo `run` configura a variável `LD_LIBRARY_PATH` para que o sistema encontre a biblioteca dinâmica durante a execução.
+
+### Compilação e limpeza
+
+O comando `make` gera as duas bibliotecas e os dois executáveis. Para remover os arquivos gerados, utilize:
+
+```bash
+make clean
+```
+
+
 ## Documentação
 
 Os comentários do cabeçalho seguem o formato Doxygen. Para gerar a
