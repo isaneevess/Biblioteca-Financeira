@@ -93,7 +93,7 @@ em `src/financiamento.c`, com interface pública em `include/financiamento.h`.
 
 - **`Simulacao`**: agrupa os resultados de `simular_fin` (`parcela`,
   `total_pago`, `total_juros` e `percentual`).
-- **`Amortizacao`**: agrupa os resultados de `amortizacao` (`meses` e
+- **`Amortizacao`**: agrupa os resultados de `amortizacao` (`parcelas` e
   `total_juros`).
 
 ### Funções
@@ -113,11 +113,11 @@ em `src/financiamento.c`, com interface pública em `include/financiamento.h`.
   calcula o maior valor que pode ser financiado:
   `financiado = parcela * (1 - (1 + taxa)^(-n)) / taxa`, ou `parcela * n` se `taxa = 0`.
 
-- **`int amortizacao(double divida, double parcela, double extra, double taxa, Amortizacao *resultado)`**
+- **`int amortizacao(double divida, double valor_parcela, double extra, double taxa, Amortizacao *resultado)`**
   Simula o financiamento mês a mês pagando a parcela mais um valor extra. A
   cada mês os juros incidem sobre o saldo devedor (`juros = saldo * taxa`) e o
-  pagamento total é descontado, até a dívida ser quitada. Devolve em quantos
-  meses isso acontece e o total de juros pago, o que permite comparar com
+  pagamento total é descontado, até a dívida ser quitada. Devolve em quantas
+  parcelas isso acontece e o total de juros pago, o que permite comparar com
   `extra = 0` e ver a economia.
 
 Todas as funções retornam `0` em caso de sucesso e `-1` caso os parâmetros de
@@ -244,6 +244,96 @@ Para compilar e rodar:
 gcc -Wall -Wextra -Iinclude tests/test_metas.c src/metas.c src/Juros.c -lm -o build/test_metas
 ./build/test_metas
 ```
+
+
+## Módulo Tempo
+
+O módulo **Tempo** reúne funções voltadas ao planejamento financeiro, permitindo calcular intervalos entre datas, estimar o prazo necessário para quitar uma dívida e determinar valores de parcelas em situações de antecipação ou atraso de pagamentos.
+
+### Funcionalidades
+
+- **`dias_entre_datas(Data inicio, Data fim)`**: calcula a quantidade de dias entre duas datas. A função valida as datas informadas e retorna `-1` caso alguma delas seja inválida.
+
+- **`meses_para_quitar(double divida, double pagamento, double taxa)`**: estima a quantidade de meses necessária para quitar uma dívida a partir do valor inicial, do pagamento mensal e da taxa de juros mensal. O cálculo considera a incidência de juros sobre o saldo devedor e a realização de pagamentos fixos. Retorna `-1` quando os parâmetros são inválidos ou quando o pagamento não é suficiente para cobrir os juros da dívida.
+
+- **`valor_antecipado(double parcela, double taxa, int dias)`**: calcula o valor de uma parcela paga antecipadamente, aplicando o desconto correspondente ao período de antecipação.
+
+- **`valor_atrasado(double parcela, double taxa, int dias)`**: calcula o valor atualizado de uma parcela paga com atraso, considerando os juros incidentes durante o período.
+
+### Convenções de cálculo
+
+As taxas de juros são informadas em formato decimal e representam taxas mensais. Por exemplo, uma taxa de `0.02` corresponde a 2% ao mês. Nas funções de antecipação e atraso, o período é convertido utilizando o mês comercial de 30 dias.
+
+As funções de antecipação e atraso utilizam capitalização composta para atualizar o valor da parcela. Para a antecipação, aplica-se o desconto sobre o valor futuro; para o atraso, calcula-se o acréscimo correspondente ao período transcorrido.
+
+### Exemplos de uso
+
+```c
+Data inicio = {1, 10, 2026};
+Data fim = {15, 10, 2026};
+
+int dias = dias_entre_datas(inicio, fim);
+// Resultado: 14 dias
+
+int meses = meses_para_quitar(1000.0, 300.0, 0.02);
+// Resultado: 4 meses
+
+double antecipado = valor_antecipado(1000.0, 0.02, 30);
+// Resultado aproximado: R$ 980,39
+
+double atrasado = valor_atrasado(1000.0, 0.02, 30);
+// Resultado: R$ 1.020,00
+```
+
+### Testes
+
+Os testes automatizados do módulo estão localizados em `tests/test_tempo.c` e verificam o cálculo de intervalos entre datas, a estimativa do prazo de quitação de dívidas e os cálculos de antecipação e atraso, incluindo situações com parâmetros inválidos.
+
+Para executar os testes do módulo junto aos demais testes da biblioteca, utilize:
+
+```bash
+make test
+```
+
+
+## Bibliotecas estática e dinâmica
+
+O projeto gera duas versões da biblioteca financeira: uma estática (`.a`) e outra dinâmica (`.so`). Ambas são construídas a partir dos arquivos objeto dos módulos da biblioteca.
+
+### Biblioteca estática
+
+A biblioteca estática é gerada no arquivo `lib/libfinanceira.a`, utilizando o comando `ar rcs`. Durante a linkagem, o código objeto necessário é incorporado ao executável, permitindo que ele seja executado sem depender da biblioteca dinâmica do projeto.
+
+Para compilar e executar a aplicação utilizando a biblioteca estática:
+
+```bash
+make
+make run-static
+```
+
+O executável gerado é `bin/app_estatico`.
+
+### Biblioteca dinâmica
+
+A biblioteca dinâmica é gerada no arquivo `lib/libfinanceira.so`, utilizando o compilador GCC com a opção `-shared`. Nesse caso, o código da biblioteca é carregado durante a execução do programa.
+
+Para compilar e executar a aplicação utilizando a biblioteca dinâmica:
+
+```bash
+make
+make run
+```
+
+O executável gerado é `bin/app_dinamico`. O alvo `run` configura a variável `LD_LIBRARY_PATH` para que o sistema encontre a biblioteca dinâmica durante a execução.
+
+### Compilação e limpeza
+
+O comando `make` gera as duas bibliotecas e os dois executáveis. Para remover os arquivos gerados, utilize:
+
+```bash
+make clean
+```
+
 
 ## Documentação
 

@@ -47,17 +47,17 @@ int valor_financiavel(double parcela, double taxa, int n, double *resultado) {
 
 }
 
-int amortizacao(double divida, double parcela, double extra, double taxa, Amortizacao *resultado) {
-    if (divida > 0 && parcela > 0 && extra >= 0 && taxa >= 0 && (parcela + extra > divida * taxa)) {
-        int meses = 0;
+int amortizacao(double divida, double valor_parcela, double extra, double taxa, Amortizacao *resultado) {
+    if (divida > 0 && valor_parcela > 0 && extra >= 0 && taxa >= 0 && (valor_parcela + extra > divida * taxa)) {
+        int parcelas = 0;
         double juros = 0, total_juros = 0;
-        for (double saldo = divida; saldo > 0.005; meses++) {
+        for (double saldo = divida; saldo > 0.005; parcelas++) {
             juros = saldo * taxa;
-            saldo += juros - (parcela + extra);
+            saldo += juros - (valor_parcela + extra);
             total_juros += juros;
         }
 
-        resultado->meses = meses;
+        resultado->parcelas = parcelas;
         resultado->total_juros = total_juros;
         return 0;
     }

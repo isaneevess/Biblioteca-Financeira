@@ -63,11 +63,11 @@ int main(void) {
     /* Sem extra quita em 12 meses; com extra de 200 quita em 10 */
     verificar(
         "amortizacao sem extra",
-        amortizacao(10000, 945.596, 0, 0.02, &a) == 0 && a.meses == 12
+        amortizacao(10000, 945.596, 0, 0.02, &a) == 0 && a.parcelas == 12
     );
     verificar(
         "amortizacao com extra de 200",
-        amortizacao(10000, 945.596, 200, 0.02, &a) == 0 && a.meses == 10
+        amortizacao(10000, 945.596, 200, 0.02, &a) == 0 && a.parcelas == 10
     );
 
     /* ---- Casos de valor limite / entrada inválida ---- */

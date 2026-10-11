@@ -1,3 +1,4 @@
+
 # --- Compilador e flags ---
 CC       := gcc
 CFLAGS   := -Wall -Wextra -std=c11 -fPIC -Iinclude
@@ -29,8 +30,9 @@ DEPS := $(OBJS:.o=.d)
 
 # --- App cliente e testes (usados pelos Blocos 2 e 3) ---
 # dependencias, e o make expande essa lista assim que le a regra: a variavel
-APP_SRC   := $(APP_DIR)/main.c
-APP_BIN   := $(BIN_DIR)/app
+APP_SRC     := $(APP_DIR)/main.c
+APP_DYNAMIC := $(BIN_DIR)/app_dinamico
+APP_STATIC  := $(BIN_DIR)/app_estatico
 TEST_SRCS := $(wildcard $(TEST_DIR)/test_*.c)
 TEST_BINS := $(patsubst $(TEST_DIR)/%.c,$(BUILD_DIR)/%,$(TEST_SRCS))
 
@@ -54,13 +56,13 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
 # biblioteca fica copiado dentro de qualquer executavel que linkar
 # com ela (standalone, nao precisa do .a depois de compilado).
 #
-# Dinamica: 'gcc -shared' gera um .so a partir dos mesmos .o. 
+# Dinamica: 'gcc -shared' gera um .so a partir dos mesmos .o.
 # O codigo NAO e copiado — fica carregado em tempo de
 # execucao, e por isso o alvo 'run' precisa do LD_LIBRARY_PATH.
 
-.PHONY: all run test clean install
+.PHONY: all run run-static test clean install
 
-all: $(STATIC_LIB) $(SHARED_LIB) $(APP_BIN)
+all: $(STATIC_LIB) $(SHARED_LIB) $(APP_DYNAMIC) $(APP_STATIC)
 
 $(STATIC_LIB): $(OBJS) | $(LIB_DIR)
 	ar rcs $@ $(OBJS)
@@ -100,12 +102,21 @@ clean:
 # Linka o app com a biblioteca DINAMICA (.so).
 # Depende de $(SHARED_LIB): so compila depois que o Bloco 2 ja gerou a
 # biblioteca dinamica.
-$(APP_BIN): $(APP_SRC) $(SHARED_LIB) | $(BIN_DIR)
+$(APP_DYNAMIC): $(APP_SRC) $(SHARED_LIB) | $(BIN_DIR)
 	$(CC) $(CFLAGS) $(APP_SRC) -L$(LIB_DIR) -l$(LIB_NAME) $(LDLIBS) -o $@
 
-# Executa o app cliente. 
-run: $(APP_BIN)
-	LD_LIBRARY_PATH=$(LIB_DIR):$$LD_LIBRARY_PATH ./$(APP_BIN)
+# Linka o app com a biblioteca ESTATICA (.a).
+# O codigo da biblioteca e incorporado ao executavel durante a linkagem.
+$(APP_STATIC): $(APP_SRC) $(STATIC_LIB) | $(BIN_DIR)
+	$(CC) $(CFLAGS) $(APP_SRC) $(STATIC_LIB) $(LDLIBS) -o $@
+
+# Executa o app cliente com a biblioteca dinamica.
+run: $(APP_DYNAMIC)
+	LD_LIBRARY_PATH=$(LIB_DIR):$$LD_LIBRARY_PATH ./$(APP_DYNAMIC)
+
+# Executa o app cliente com a biblioteca estatica.
+run-static: $(APP_STATIC)
+	./$(APP_STATIC)
 
 # -------------------------------------------------------------------
 # Testes automatizados — um binario por módulo, nomeado explicitamente
@@ -115,7 +126,7 @@ run: $(APP_BIN)
 # os arquivos de teste usam apenas as funções da API pública (headers),
 # então basta ter os simbolos disponiveis no link.
 
-# Modulo: juros 
+# Modulo: juros
 $(BUILD_DIR)/test_juros: $(TEST_DIR)/test_juros.c $(OBJS) | $(BUILD_DIR)
 	$(CC) $(CFLAGS) $< $(OBJS) $(LDLIBS) -o $@
 
@@ -150,4 +161,3 @@ test: $(BUILD_DIR)/test_juros $(BUILD_DIR)/test_financiamento $(BUILD_DIR)/test_
 	./$(BUILD_DIR)/test_tempo || status=1; \
 	echo ""; \
 	exit $$status
-
