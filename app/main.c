@@ -107,10 +107,82 @@ void demonstrar_financiamento() {
     printf("\n");
 }
 
+
+void demonstrar_tempo(void) {
+    printf("--- Modulo Tempo ---\n");
+
+    Data inicio = {1, 10, 2026};
+    Data fim = {15, 10, 2026};
+
+    int dias = dias_entre_datas(inicio, fim);
+
+    printf("Data inicial: %02d/%02d/%04d\n",
+           inicio.dia, inicio.mes, inicio.ano);
+    printf("Data final:   %02d/%02d/%04d\n",
+           fim.dia, fim.mes, fim.ano);
+
+    if (dias >= 0) {
+        printf("Dias entre as datas: %d dias\n", dias);
+    } else {
+        printf("Erro: uma das datas e invalida.\n");
+    }
+
+    double divida = 1000.0;
+    double pagamento = 300.0;
+    double taxa = 0.02;
+
+    int meses = meses_para_quitar(divida, pagamento, taxa);
+
+    printf("\nDivida: R$ %.2f\n", divida);
+    printf("Pagamento mensal: R$ %.2f\n", pagamento);
+    printf("Taxa mensal: %.2f%%\n", taxa * 100);
+
+    if (meses >= 0) {
+        printf("Prazo para quitar: %d meses\n", meses);
+    } else {
+        printf("Erro: parametros invalidos ou pagamento insuficiente.\n");
+    }
+
+    double parcela = 1000.0;
+    int dias_antecipacao = 30;
+
+    double valor_presente =
+        valor_antecipado(parcela, taxa, dias_antecipacao);
+
+    printf("\nParcela original: R$ %.2f\n", parcela);
+    printf("Antecipacao: %d dias\n", dias_antecipacao);
+
+    if (valor_presente >= 0.0) {
+        printf("Valor com antecipacao: R$ %.2f\n", valor_presente);
+    } else {
+        printf("Erro ao calcular o valor antecipado.\n");
+    }
+
+    int dias_atraso = 30;
+
+    double valor_atualizado =
+        valor_atrasado(parcela, taxa, dias_atraso);
+
+    printf("\nAtraso: %d dias\n", dias_atraso);
+
+    if (valor_atualizado >= 0.0) {
+        printf("Valor com atraso: R$ %.2f\n", valor_atualizado);
+    } else {
+        printf("Erro ao calcular o valor atrasado.\n");
+    }
+
+    printf("\n");
+}
+
+
 int main(void) {
     printf("=== Demonstracao da Biblioteca Financeira ===\n\n");
+
     demonstrar_juros();
     demonstrar_metas();
     demonstrar_financiamento();
+    demonstrar_tempo();
+
     return 0;
 }
+

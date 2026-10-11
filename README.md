@@ -245,6 +245,57 @@ gcc -Wall -Wextra -Iinclude tests/test_metas.c src/metas.c src/Juros.c -lm -o bu
 ./build/test_metas
 ```
 
+
+## Módulo Tempo
+
+O módulo **Tempo** reúne funções voltadas ao planejamento financeiro, permitindo calcular intervalos entre datas, estimar o prazo necessário para quitar uma dívida e determinar valores de parcelas em situações de antecipação ou atraso de pagamentos.
+
+### Funcionalidades
+
+- **`dias_entre_datas(Data inicio, Data fim)`**: calcula a quantidade de dias entre duas datas. A função valida as datas informadas e retorna `-1` caso alguma delas seja inválida.
+
+- **`meses_para_quitar(double divida, double pagamento, double taxa)`**: estima a quantidade de meses necessária para quitar uma dívida a partir do valor inicial, do pagamento mensal e da taxa de juros mensal. O cálculo considera a incidência de juros sobre o saldo devedor e a realização de pagamentos fixos. Retorna `-1` quando os parâmetros são inválidos ou quando o pagamento não é suficiente para cobrir os juros da dívida.
+
+- **`valor_antecipado(double parcela, double taxa, int dias)`**: calcula o valor de uma parcela paga antecipadamente, aplicando o desconto correspondente ao período de antecipação.
+
+- **`valor_atrasado(double parcela, double taxa, int dias)`**: calcula o valor atualizado de uma parcela paga com atraso, considerando os juros incidentes durante o período.
+
+### Convenções de cálculo
+
+As taxas de juros são informadas em formato decimal e representam taxas mensais. Por exemplo, uma taxa de `0.02` corresponde a 2% ao mês. Nas funções de antecipação e atraso, o período é convertido utilizando o mês comercial de 30 dias.
+
+As funções de antecipação e atraso utilizam capitalização composta para atualizar o valor da parcela. Para a antecipação, aplica-se o desconto sobre o valor futuro; para o atraso, calcula-se o acréscimo correspondente ao período transcorrido.
+
+### Exemplos de uso
+
+```c
+Data inicio = {1, 10, 2026};
+Data fim = {15, 10, 2026};
+
+int dias = dias_entre_datas(inicio, fim);
+// Resultado: 14 dias
+
+int meses = meses_para_quitar(1000.0, 300.0, 0.02);
+// Resultado: 4 meses
+
+double antecipado = valor_antecipado(1000.0, 0.02, 30);
+// Resultado aproximado: R$ 980,39
+
+double atrasado = valor_atrasado(1000.0, 0.02, 30);
+// Resultado: R$ 1.020,00
+```
+
+### Testes
+
+Os testes automatizados do módulo estão localizados em `tests/test_tempo.c` e verificam o cálculo de intervalos entre datas, a estimativa do prazo de quitação de dívidas e os cálculos de antecipação e atraso, incluindo situações com parâmetros inválidos.
+
+Para executar os testes do módulo junto aos demais testes da biblioteca, utilize:
+
+```bash
+make test
+```
+
+
 ## Documentação
 
 Os comentários do cabeçalho seguem o formato Doxygen. Para gerar a
