@@ -166,4 +166,4 @@ doc:
 	doxygen Doxyfile
 
 clean-doc:
-	rm -rf docs/html docs/latex
+	rm -rf docs/html 
