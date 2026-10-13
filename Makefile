@@ -161,3 +161,9 @@ test: $(BUILD_DIR)/test_juros $(BUILD_DIR)/test_financiamento $(BUILD_DIR)/test_
 	./$(BUILD_DIR)/test_tempo || status=1; \
 	echo ""; \
 	exit $$status
+
+doc:
+	doxygen Doxyfile
+
+clean-doc:
+	rm -rf docs/html docs/latex
